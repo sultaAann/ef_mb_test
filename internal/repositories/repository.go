@@ -21,7 +21,7 @@ func NewRepository(db *gorm.DB) Repository {
 }
 
 func (r repository) GetAll() {
-	
+
 }
 
 func (r repository) GetById() {
@@ -36,5 +36,5 @@ func (r repository) Update() {
 }
 
 func (r repository) DeleteById() {
-
+	// r.db.Delete()
 }
