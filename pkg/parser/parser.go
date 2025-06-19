@@ -1,4 +1,4 @@
-package service
+package parser
 
 import (
 	"encoding/json"
@@ -65,11 +65,11 @@ func (p *Parser) Parse_age(name string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-
-	if _, ok := data["age"].(float64); !ok {
+	age, ok := data["age"].(float64)
+	if !ok {
 		return -1, fmt.Errorf("Person not found")
 	}
-	return int(data["age"].(float64)), nil
+	return int(age), nil
 }
 
 func (p *Parser) Parse_gender(name string) (string, error) {
