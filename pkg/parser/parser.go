@@ -14,12 +14,35 @@ const (
 	NATION string = "https://api.nationalize.io/"
 )
 
+type Parsed_data struct {
+	Age     int
+	Gender  string
+	Nations []string
+}
+
 type Parser struct {
 	client *http.Client
 }
 
 func NewParser(NewClient *http.Client) *Parser {
 	return &Parser{client: NewClient}
+}
+
+func (p *Parser) Parse(name string) (*Parsed_data, error) {
+	age, err := p.parse_age(name)
+	if err != nil {
+		return nil, err
+	}
+	gender, err := p.parse_gender(name)
+	if err != nil {
+		return nil, err
+	}
+	nations, err := p.parse_nation(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Parsed_data{age, gender, nations}, nil
 }
 
 func (p *Parser) do_request(todo, name string) ([]byte, error) {
@@ -54,7 +77,7 @@ func (p *Parser) do_request(todo, name string) ([]byte, error) {
 	return body, nil
 }
 
-func (p *Parser) Parse_age(name string) (int, error) {
+func (p *Parser) parse_age(name string) (int, error) {
 	body, err := p.do_request(AGE, name)
 	if err != nil {
 		return 0, err
@@ -72,7 +95,7 @@ func (p *Parser) Parse_age(name string) (int, error) {
 	return int(age), nil
 }
 
-func (p *Parser) Parse_gender(name string) (string, error) {
+func (p *Parser) parse_gender(name string) (string, error) {
 	body, err := p.do_request(GENDER, name)
 	if err != nil {
 		return "", err
@@ -90,7 +113,7 @@ func (p *Parser) Parse_gender(name string) (string, error) {
 	return gender, nil
 }
 
-func (p *Parser) Parse_nation(name string) ([]string, error) {
+func (p *Parser) parse_nation(name string) ([]string, error) {
 	body, err := p.do_request(NATION, name)
 
 	if err != nil {

@@ -9,6 +9,6 @@ type handler struct {
 	s *services.Service
 }
 
-func NewHandler(s services.Service) Handler {
-	return &handler{s: &s}
+func NewHandler(s *services.Service) Handler {
+	return &handler{s: s}
 }
