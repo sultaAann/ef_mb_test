@@ -11,26 +11,12 @@ import (
 	"gorm.io/gorm"
 )
 
-/*
-1 Для получения данных с различными фильтрами и пагинацией
-2 Для удаления по идентификатору
-3 Для изменения сущности
-4 Для добавления новых людей в формате
-```json
-{
-"name": "Dmitriy",
-"surname": "Ushakov",
-"patronymic": "Vasilevich" // необязательно
-}
-```
-*/
-
 type Service interface {
 	GetAll()
 	GetById(id uint) (*models.Person, error)
-	Create(dto models.RequestDTO) (uint, error)
-	Update() error
-	DeleteById(id uint)
+	Create(dto models.CreateDTO) (uint, error)
+	Update(dto models.UpdateDTO) error
+	DeleteById(id uint) error
 }
 
 type service struct {
@@ -58,7 +44,7 @@ func (s service) GetById(id uint) (*models.Person, error) {
 	return person, nil
 }
 
-func (s service) Create(dto models.RequestDTO) (uint, error) {
+func (s service) Create(dto models.CreateDTO) (uint, error) {
 	parsed_data, err := s.psr.Parse(dto.Name)
 	if err != nil {
 		return 0, fmt.Errorf("Error Parsing data: %w", err)
@@ -78,10 +64,25 @@ func (s service) Create(dto models.RequestDTO) (uint, error) {
 	return id, nil
 }
 
-func (s service) Update() error {
+func (s service) Update(dto models.UpdateDTO) error {
+	err := s.r.Update(models.Person{
+		ID:          dto.ID,
+		Name:        dto.Name,
+		Surname:     dto.Surname,
+		Pantronymic: dto.Pantronymic,
+		Age:         dto.Age,
+		Gender:      dto.Gender,
+		Nations:     dto.Nations,
+	})
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return custom_errors.NewNotFoundError("Person", dto.ID, "Person Not Found")
+		}
+		return err
+	}
 	return nil
 }
 
-func (s service) DeleteById(id uint) {
-	s.r.DeleteById(id)
+func (s service) DeleteById(id uint) error {
+	return s.r.DeleteById(id)
 }

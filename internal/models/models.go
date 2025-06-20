@@ -17,8 +17,18 @@ type Person struct {
 	Nations     pq.StringArray `json:"nationality" gorm:"type:text[]"`
 }
 
-type RequestDTO struct {
+type CreateDTO struct {
 	Name        string `json:"name"`
 	Surname     string `json:"surname"`
 	Pantronymic string `json:"pantronymic"`
+}
+
+type UpdateDTO struct {
+	ID          uint     `json:"id"`
+	Name        string   `json:"name"`
+	Surname     string   `json:"surname"`
+	Pantronymic string   `json:"pantronymic"`
+	Age         int      `json:"age"`
+	Gender      string   `json:"gender"`
+	Nations     []string `json:"nationality"`
 }

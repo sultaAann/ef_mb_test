@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"ef_md_test/internal/custom_errors"
 	"ef_md_test/internal/models"
 	"errors"
 	"fmt"
@@ -13,7 +14,7 @@ type Repository interface {
 	GetById(id uint) (*models.Person, error)
 	Create(person models.Person) (uint, error)
 	Update(person models.Person) error
-	DeleteById(id uint)
+	DeleteById(id uint) error
 }
 
 type repository struct {
@@ -42,7 +43,6 @@ func (r *repository) GetById(id uint) (*models.Person, error) {
 
 func (r *repository) Create(person models.Person) (uint, error) {
 	result := r.db.Create(&person)
-	fmt.Println(person)
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return 0, err
@@ -74,6 +74,15 @@ func (r *repository) Update(person models.Person) error {
 	return nil
 }
 
-func (r *repository) DeleteById(id uint) {
-	r.db.Delete(&models.Person{}, id)
+// не удаляет полностью делает нулл и сдавит время deleted_at. что то типо отметки. отмечает что запись удалена. но оставлена в бд
+func (r *repository) DeleteById(id uint) error {
+	res := r.db.Delete(&models.Person{ID: id})
+
+	if res.Error != nil {
+		return fmt.Errorf("Db Error: %w", res.Error)
+	}
+	if res.RowsAffected == 0 {
+		return custom_errors.NewNotFoundError("", id, "Deleted data is not found")
+	}
+	return nil
 }
