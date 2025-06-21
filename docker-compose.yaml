@@ -9,11 +9,15 @@ services:
       interval: 1s
       timeout: 5s
       retries: 10
+
   app:
     build: .
     env_file:
       - ".env"
+    ports:
+      - "8080:80"
     depends_on:
       db:
         condition: service_healthy
-    command: /app/app
+    command: sh -c "sleep 10 && /app/app"
+    restart: always

@@ -63,7 +63,7 @@ func (r *repository) Update(person models.Person) error {
 	err := r.db.Model(&now).Updates(&models.Person{
 		Name:        person.Name,
 		Surname:     person.Surname,
-		Pantronymic: person.Pantronymic,
+		Patronymic: person.Patronymic,
 		Age:         person.Age,
 		Gender:      person.Gender,
 		Nations:     person.Nations,

@@ -16,9 +16,6 @@ func ConnectDB() (*gorm.DB, error) {
 	dbname := os.Getenv("NAME_DB")
 	port := os.Getenv("PORT")
 
-	// fmt.Printf("DB Config: host=%s user=%s password=%s dbname=%s port=%s\n",
-	//     host, user, password, dbname, port)
-
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		host, user, password, dbname, port,
@@ -31,5 +28,6 @@ func ConnectDB() (*gorm.DB, error) {
 		return nil, err
 	}
 	db.AutoMigrate(&models.Person{})
+
 	return db, nil
 }

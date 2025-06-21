@@ -52,7 +52,7 @@ func (s service) Create(dto models.CreateDTO) (uint, error) {
 	person := models.Person{
 		Name:        dto.Name,
 		Surname:     dto.Surname,
-		Pantronymic: dto.Pantronymic,
+		Patronymic: dto.Patronymic,
 		Age:         parsed_data.Age,
 		Gender:      parsed_data.Gender,
 		Nations:     parsed_data.Nations,
@@ -69,7 +69,7 @@ func (s service) Update(dto models.UpdateDTO) error {
 		ID:          dto.ID,
 		Name:        dto.Name,
 		Surname:     dto.Surname,
-		Pantronymic: dto.Pantronymic,
+		Patronymic: dto.Patronymic,
 		Age:         dto.Age,
 		Gender:      dto.Gender,
 		Nations:     dto.Nations,

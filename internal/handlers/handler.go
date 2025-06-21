@@ -1,6 +1,15 @@
 package handlers
 
-import "ef_md_test/internal/services"
+import (
+	"ef_md_test/internal/custom_errors"
+	"ef_md_test/internal/models"
+	"ef_md_test/internal/services"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"regexp"
+	"strconv"
+)
 
 /*
 1 Для получения данных с различными фильтрами и пагинацией
@@ -16,13 +25,143 @@ import "ef_md_test/internal/services"
 ```
 */
 
+var (
+	People       = regexp.MustCompile(`^/people/*$`)
+	PeopleWithID = regexp.MustCompile(`^/people/([1-9][0-9]*)$`)
+)
+
 type Handler interface {
+	ServeHTTP(w http.ResponseWriter, r *http.Request)
+	GetAll(w http.ResponseWriter, r *http.Request)
+	GetById(w http.ResponseWriter, r *http.Request)
+	Create(w http.ResponseWriter, r *http.Request)
+	Update(w http.ResponseWriter, r *http.Request)
+	Delete(w http.ResponseWriter, r *http.Request)
 }
 
 type handler struct {
-	s *services.Service
+	s services.Service
 }
 
-func NewHandler(s *services.Service) Handler {
+func NewHandler(s services.Service) Handler {
 	return &handler{s: s}
+}
+
+func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch {
+	case r.Method == http.MethodDelete && PeopleWithID.MatchString(r.URL.Path):
+		h.Delete(w, r)
+		return
+	case r.Method == http.MethodGet && PeopleWithID.MatchString(r.URL.Path):
+		h.GetById(w, r)
+		return
+	case r.Method == http.MethodPost && People.MatchString(r.URL.Path):
+		h.Create(w, r)
+		return
+	case r.Method == http.MethodPut && People.MatchString(r.URL.Path):
+		h.Update(w, r)
+		return
+	case r.Method == http.MethodGet && People.MatchString(r.URL.Path):
+		h.GetAll(w, r)
+		return
+	}
+}
+
+func (h *handler) GetAll(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (h *handler) GetById(w http.ResponseWriter, r *http.Request) {
+	matches := PeopleWithID.FindStringSubmatch(r.URL.Path)
+	if len(matches) < 2 {
+		InternalServerErrorHandler(w, r)
+		return
+	}
+
+	id, err := strconv.Atoi(matches[1])
+	if err != nil {
+		NotFoundHandler(w, r)
+		return
+	}
+
+	person, err := h.s.GetById(uint(id))
+	if err != nil {
+		if errors.Is(err, &custom_errors.NotFoundError{}) {
+			NotFoundHandler(w, r)
+			return
+		}
+		InternalServerErrorHandler(w, r)
+		return
+	}
+
+	data, err := json.Marshal(person)
+	if err != nil {
+		InternalServerErrorHandler(w, r)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
+
+func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
+	var person models.CreateDTO
+
+	if err := json.NewDecoder(r.Body).Decode(&person); err != nil {
+		InternalServerErrorHandler(w, r)
+		return
+	}
+
+	id, err := h.s.Create(person)
+
+	if err != nil {
+		InternalServerErrorHandler(w, r)
+		return
+	}
+
+	j := map[string]float64{"id": float64(id)}
+	data, err := json.Marshal(j)
+	if err != nil {
+		InternalServerErrorHandler(w, r)
+		return
+	}
+	w.Write(data)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
+	matches := PeopleWithID.FindStringSubmatch(r.URL.Path)
+	if len(matches) < 2 {
+		InternalServerErrorHandler(w, r)
+		return
+	}
+
+	id, err := strconv.Atoi(matches[1])
+	if err != nil {
+		NotFoundHandler(w, r)
+		return
+	}
+	err = h.s.DeleteById(uint(id))
+	if err != nil {
+		if errors.Is(err, &custom_errors.NotFoundError{}) {
+			NotFoundHandler(w, r)
+			return
+		}
+		InternalServerErrorHandler(w, r)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func InternalServerErrorHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte("500 Internal Server Error"))
+}
+
+func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte("404 Not Found\nCheck Path"))
 }

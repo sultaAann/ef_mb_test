@@ -1,16 +1,14 @@
 package main
 
 import (
-	"ef_md_test/internal/config"
-	"fmt"
-	"time"
+	"log"
+	"net/http"
 
-	// "ef_md_test/internal/handlers"
+	"ef_md_test/internal/config"
+	"ef_md_test/internal/handlers"
 	"ef_md_test/internal/repositories"
 	"ef_md_test/internal/services"
 	"ef_md_test/pkg/parser"
-	"log"
-	"net/http"
 )
 
 func main() {
@@ -25,15 +23,12 @@ func main() {
 
 	ser := services.NewService(rep, psr)
 
-	for {
-		fmt.Println("RABOTAET")
-		time.Sleep(time.Duration(10) * time.Second)
-		fmt.Println(ser)
-	}
-	// p, err = ser.GetById(id)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(*p)
-	// handler := handlers.NewHandler(ser)
+	handlers := handlers.NewHandler(ser)
+
+	mux := http.NewServeMux()
+
+	mux.Handle("/people", handlers)
+	mux.Handle("/people/", handlers)
+
+	http.ListenAndServe(":80", mux)
 }

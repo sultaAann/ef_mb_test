@@ -12,4 +12,6 @@ RUN useradd app
 
 USER app
 
+EXPOSE 80
+
 CMD ["/app/app"]
