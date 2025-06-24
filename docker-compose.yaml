@@ -9,7 +9,8 @@ services:
       interval: 1s
       timeout: 5s
       retries: 10
-
+    volumes:
+      - "db_data:/var/lib/postgresql/data"
   app:
     build: .
     env_file:
@@ -21,3 +22,5 @@ services:
         condition: service_healthy
     command: sh -c "sleep 3 && /app/app"
     restart: always
+volumes:
+  db_data:

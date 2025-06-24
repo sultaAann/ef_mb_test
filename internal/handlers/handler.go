@@ -48,6 +48,8 @@ func NewHandler(s services.Service) Handler {
 }
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	switch {
 	case r.Method == http.MethodDelete && PeopleWithID.MatchString(r.URL.Path):
 		h.Delete(w, r)
@@ -68,14 +70,6 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) GetAll(w http.ResponseWriter, r *http.Request) {
-	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
-
-	if page == 0 {
-		page = 1
-	}
-	result, err := h.s.GetAll()
-
-	w.Header().Set("Content-Type", "application/json")
 	pageStr := r.URL.Query().Get("page")
 	pageSizeStr := r.URL.Query().Get("pageSize")
 	page := 1
@@ -98,7 +92,12 @@ func (h *handler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(result)
+	if err != nil {
+		InternalServerErrorHandler(w, r)
+		return
+	}
 }
 
 func (h *handler) GetById(w http.ResponseWriter, r *http.Request) {
@@ -123,14 +122,14 @@ func (h *handler) GetById(w http.ResponseWriter, r *http.Request) {
 			InternalServerErrorHandler(w, r)
 			return
 		}
+	}
 
-		err = json.NewEncoder(w).Encode(person)
-		if err != nil {
-			InternalServerErrorHandler(w, r)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(person)
+	if err != nil {
+		InternalServerErrorHandler(w, r)
+		return
 	}
 }
 
@@ -150,14 +149,13 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	j := map[string]float64{"id": float64(id)}
-	err = json.NewEncoder(w).Encode(j)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(j)
 	if err != nil {
 		InternalServerErrorHandler(w, r)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
 }
 
 func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
@@ -177,24 +175,7 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 		InternalServerErrorHandler(w, r)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	var updatePerson models.UpdateDTO
 
-	if err := json.NewDecoder(r.Body).Decode(&updatePerson); err != nil {
-		InternalServerErrorHandler(w, r)
-		return
-	}
-
-	err = h.s.Update(updatePerson)
-	if err != nil {
-		if errors.As(err, &custom_errors.NotFoundError{}) {
-			NotFoundHandler(w, r)
-			return
-		}
-		InternalServerErrorHandler(w, r)
-		return
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
@@ -222,9 +203,9 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-
 }
 func InternalServerErrorHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusInternalServerError)
