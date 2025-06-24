@@ -12,7 +12,7 @@ import (
 )
 
 type Service interface {
-	GetAll()
+	GetAll(pageSize, offset int) (map[string]interface{}, error)
 	GetById(id uint) (*models.Person, error)
 	Create(dto models.CreateDTO) (uint, error)
 	Update(dto models.UpdateDTO) error
@@ -28,14 +28,27 @@ func NewService(r repositories.Repository, psr *parser.Parser) Service {
 	return &service{r: r, psr: psr}
 }
 
-func (s service) GetAll() {
+func (s service) GetAll(pageSize, offset int) (map[string]interface{}, error) {
+	res, count, err := s.r.GetAll(pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+	response := map[string]interface{}{
+		"data":      res,
+		"page":      0,
+		"pageSize":  pageSize,
+		"total":     count,
+		"totalPage": (count + int64(pageSize) - 1) / int64(pageSize),
+	}
 
+	return response, nil
 }
 
 func (s service) GetById(id uint) (*models.Person, error) {
 	person, err := s.r.GetById(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Println("service")
 			err = custom_errors.NewNotFoundError("Person", id, "Person Not Found")
 			return nil, err
 		}
@@ -52,7 +65,7 @@ func (s service) Create(dto models.CreateDTO) (uint, error) {
 	person := models.Person{
 		Name:        dto.Name,
 		Surname:     dto.Surname,
-		Patronymic: dto.Patronymic,
+		Pantronymic: dto.Pantronymic,
 		Age:         parsed_data.Age,
 		Gender:      parsed_data.Gender,
 		Nations:     parsed_data.Nations,
@@ -69,7 +82,7 @@ func (s service) Update(dto models.UpdateDTO) error {
 		ID:          dto.ID,
 		Name:        dto.Name,
 		Surname:     dto.Surname,
-		Patronymic: dto.Patronymic,
+		Pantronymic: dto.Pantronymic,
 		Age:         dto.Age,
 		Gender:      dto.Gender,
 		Nations:     dto.Nations,
