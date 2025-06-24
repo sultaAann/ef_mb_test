@@ -12,11 +12,7 @@ import (
 )
 
 type Service interface {
-<<<<<<< HEAD
 	GetAll(pageSize, offset int) (map[string]interface{}, error)
-=======
-	GetAll(page int) ([]models.Person, error)
->>>>>>> db9b6a9b13687926bec0bda50f63e58aad11eec7
 	GetById(id uint) (*models.Person, error)
 	Create(dto models.CreateDTO) (uint, error)
 	Update(dto models.UpdateDTO) error
@@ -32,7 +28,6 @@ func NewService(r repositories.Repository, psr *parser.Parser) Service {
 	return &service{r: r, psr: psr}
 }
 
-<<<<<<< HEAD
 func (s service) GetAll(pageSize, offset int) (map[string]interface{}, error) {
 	res, count, err := s.r.GetAll(pageSize, offset)
 	if err != nil {
@@ -47,11 +42,6 @@ func (s service) GetAll(pageSize, offset int) (map[string]interface{}, error) {
 	}
 
 	return response, nil
-=======
-func (s service) GetAll(page int) ([]models.Person, error) {
-	return nil, nil
-	// panic("DD")
->>>>>>> db9b6a9b13687926bec0bda50f63e58aad11eec7
 }
 
 func (s service) GetById(id uint) (*models.Person, error) {

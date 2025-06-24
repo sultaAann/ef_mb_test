@@ -73,7 +73,6 @@ func (r *repository) Update(person models.Person) error {
 		Name:        person.Name,
 		Surname:     person.Surname,
 		Pantronymic: person.Pantronymic,
-		Pantronymic: person.Pantronymic,
 		Age:         person.Age,
 		Gender:      person.Gender,
 		Nations:     person.Nations,

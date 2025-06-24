@@ -6,7 +6,6 @@ import (
 	"ef_md_test/internal/services"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -116,26 +115,23 @@ func (h *handler) GetById(w http.ResponseWriter, r *http.Request) {
 	}
 	person, err := h.s.GetById(uint(id))
 	if err != nil {
-		fmt.Println(err)
 		if errors.As(err, &custom_errors.NotFoundError{}) {
-		fmt.Println(err)
-		if errors.As(err, &custom_errors.NotFoundError{}) {
-			NotFoundHandler(w, r)
+			if errors.As(err, &custom_errors.NotFoundError{}) {
+				NotFoundHandler(w, r)
+				return
+			}
+			InternalServerErrorHandler(w, r)
 			return
 		}
-		InternalServerErrorHandler(w, r)
-		return
-	}
 
-	data, err := json.Marshal(person)
-	if err != nil {
-		InternalServerErrorHandler(w, r)
-		return
+		err = json.NewEncoder(w).Encode(person)
+		if err != nil {
+			InternalServerErrorHandler(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(data)
 }
 
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
@@ -162,8 +158,6 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
 }
 
 func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
@@ -176,7 +170,6 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	err := h.s.Update(updatePerson)
 	if err != nil {
-		fmt.Println(err)
 		if errors.As(err, &custom_errors.NotFoundError{}) {
 			NotFoundHandler(w, r)
 			return
@@ -193,9 +186,8 @@ func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.s.Update(updatePerson)
+	err = h.s.Update(updatePerson)
 	if err != nil {
-		fmt.Println(err)
 		if errors.As(err, &custom_errors.NotFoundError{}) {
 			NotFoundHandler(w, r)
 			return
@@ -222,18 +214,18 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 	err = h.s.DeleteById(uint(id))
 	if err != nil {
 		if errors.As(err, &custom_errors.NotFoundError{}) {
-		if errors.As(err, &custom_errors.NotFoundError{}) {
-			NotFoundHandler(w, r)
+			if errors.As(err, &custom_errors.NotFoundError{}) {
+				NotFoundHandler(w, r)
+				return
+			}
+			InternalServerErrorHandler(w, r)
 			return
 		}
-		InternalServerErrorHandler(w, r)
-		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-}
 
+}
 func InternalServerErrorHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusInternalServerError)
 	w.Write([]byte("500 Internal Server Error"))
