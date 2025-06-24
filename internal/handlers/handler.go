@@ -69,6 +69,14 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) GetAll(w http.ResponseWriter, r *http.Request) {
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+
+	if page == 0 {
+		page = 1
+	}
+	result, err := h.s.GetAll()
+
+	w.Header().Set("Content-Type", "application/json")
 	pageStr := r.URL.Query().Get("page")
 	pageSizeStr := r.URL.Query().Get("pageSize")
 	page := 1
@@ -110,6 +118,8 @@ func (h *handler) GetById(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 		if errors.As(err, &custom_errors.NotFoundError{}) {
+		fmt.Println(err)
+		if errors.As(err, &custom_errors.NotFoundError{}) {
 			NotFoundHandler(w, r)
 			return
 		}
@@ -122,6 +132,7 @@ func (h *handler) GetById(w http.ResponseWriter, r *http.Request) {
 		InternalServerErrorHandler(w, r)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
@@ -144,15 +155,37 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	j := map[string]float64{"id": float64(id)}
 	err = json.NewEncoder(w).Encode(j)
+	err = json.NewEncoder(w).Encode(j)
 	if err != nil {
 		InternalServerErrorHandler(w, r)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (h *handler) Update(w http.ResponseWriter, r *http.Request) {
+	var updatePerson models.UpdateDTO
+
+	if err := json.NewDecoder(r.Body).Decode(&updatePerson); err != nil {
+		InternalServerErrorHandler(w, r)
+		return
+	}
+
+	err := h.s.Update(updatePerson)
+	if err != nil {
+		fmt.Println(err)
+		if errors.As(err, &custom_errors.NotFoundError{}) {
+			NotFoundHandler(w, r)
+			return
+		}
+		InternalServerErrorHandler(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	var updatePerson models.UpdateDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&updatePerson); err != nil {
@@ -189,12 +222,14 @@ func (h *handler) Delete(w http.ResponseWriter, r *http.Request) {
 	err = h.s.DeleteById(uint(id))
 	if err != nil {
 		if errors.As(err, &custom_errors.NotFoundError{}) {
+		if errors.As(err, &custom_errors.NotFoundError{}) {
 			NotFoundHandler(w, r)
 			return
 		}
 		InternalServerErrorHandler(w, r)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }

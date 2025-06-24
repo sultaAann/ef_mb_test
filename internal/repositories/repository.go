@@ -42,6 +42,7 @@ func (r *repository) GetById(id uint) (*models.Person, error) {
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			fmt.Println("repository")
+			fmt.Println("repository")
 			return nil, err
 		}
 		return nil, fmt.Errorf("Failed to fetch user: %d %w", id, err)
@@ -71,6 +72,7 @@ func (r *repository) Update(person models.Person) error {
 	err := r.db.Model(&now).Updates(&models.Person{
 		Name:        person.Name,
 		Surname:     person.Surname,
+		Pantronymic: person.Pantronymic,
 		Pantronymic: person.Pantronymic,
 		Age:         person.Age,
 		Gender:      person.Gender,
