@@ -8,27 +8,27 @@ import (
 
 type Person struct {
 	gorm.Model
-	ID         uint           `json:"id" gorm:"primaryKey"`
-	Name       string         `json:"name" gorm:"name"`
-	Surname    string         `json:"surname" gorm:"surname"`
-	Patronymic string         `json:"pantronymic" gorm:"patronymic"`
-	Age        int            `json:"age" gorm:"age"`
-	Gender     string         `json:"gender" gorm:"gender"`
-	Nations    pq.StringArray `json:"nationality" gorm:"type:text[]"`
+	ID          uint           `json:"id" gorm:"primaryKey"`
+	Name        string         `json:"name" gorm:"name"`
+	Surname     string         `json:"surname" gorm:"surname"`
+	Pantronymic string         `json:"pantronymic" gorm:"pantronymic"`
+	Age         int            `json:"age" gorm:"age"`
+	Gender      string         `json:"gender" gorm:"gender"`
+	Nations     pq.StringArray `json:"nationality" gorm:"type:text[]"`
 }
 
 type CreateDTO struct {
-	Name       string `json:"name"`
-	Surname    string `json:"surname"`
-	Patronymic string `json:"patronymic"`
+	Name        string `json:"name"`
+	Surname     string `json:"surname"`
+	Pantronymic string `json:"pantronymic"`
 }
 
 type UpdateDTO struct {
-	ID         uint     `json:"id"`
-	Name       string   `json:"name"`
-	Surname    string   `json:"surname"`
-	Patronymic string   `json:"patronymic"`
-	Age        int      `json:"age"`
-	Gender     string   `json:"gender"`
-	Nations    []string `json:"nationality"`
+	ID          uint     `json:"id"`
+	Name        string   `json:"name"`
+	Surname     string   `json:"surname"`
+	Pantronymic string   `json:"pantronymic"`
+	Age         int      `json:"age"`
+	Gender      string   `json:"gender"`
+	Nations     []string `json:"nationality"`
 }

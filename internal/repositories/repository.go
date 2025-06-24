@@ -10,7 +10,7 @@ import (
 )
 
 type Repository interface {
-	GetAll()
+	GetAll(page int) ([]models.Person, error)
 	GetById(id uint) (*models.Person, error)
 	Create(person models.Person) (uint, error)
 	Update(person models.Person) error
@@ -25,8 +25,8 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) GetAll() {
-
+func (r *repository) GetAll(page int) ([]models.Person, error) {
+	r.db.Find()
 }
 
 func (r *repository) GetById(id uint) (*models.Person, error) {
@@ -34,6 +34,7 @@ func (r *repository) GetById(id uint) (*models.Person, error) {
 	result := r.db.First(&person, id)
 	if err := result.Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			fmt.Println("repository")
 			return nil, err
 		}
 		return nil, fmt.Errorf("Failed to fetch user: %d %w", id, err)
@@ -63,7 +64,7 @@ func (r *repository) Update(person models.Person) error {
 	err := r.db.Model(&now).Updates(&models.Person{
 		Name:        person.Name,
 		Surname:     person.Surname,
-		Patronymic: person.Patronymic,
+		Pantronymic: person.Pantronymic,
 		Age:         person.Age,
 		Gender:      person.Gender,
 		Nations:     person.Nations,
