@@ -115,13 +115,12 @@ func (h *handler) GetById(w http.ResponseWriter, r *http.Request) {
 	person, err := h.s.GetById(uint(id))
 	if err != nil {
 		if errors.As(err, &custom_errors.NotFoundError{}) {
-			if errors.As(err, &custom_errors.NotFoundError{}) {
-				NotFoundHandler(w, r)
-				return
-			}
-			InternalServerErrorHandler(w, r)
+			NotFoundHandler(w, r)
 			return
 		}
+		InternalServerErrorHandler(w, r)
+		return
+
 	}
 
 	w.Header().Set("Content-Type", "application/json")
